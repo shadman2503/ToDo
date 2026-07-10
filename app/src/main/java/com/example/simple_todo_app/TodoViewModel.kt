@@ -21,6 +21,12 @@ class TodoViewModel: ViewModel() {
         }
     }
 
+    fun updateTodo(todo: Todo) {
+        viewModelScope.launch(Dispatchers.IO) {
+            todoDao.updateTodo(todo)
+        }
+    }
+
     fun deleteTodo(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             todoDao.deleteTodo(id)
