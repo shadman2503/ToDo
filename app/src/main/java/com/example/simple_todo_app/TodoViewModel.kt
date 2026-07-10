@@ -15,9 +15,9 @@ class TodoViewModel: ViewModel() {
     val todoList : LiveData<List<Todo>> = todoDao.getAllTodo()
 
 
-    fun addTodo(title: String) {
+    fun addTodo(title: String, description: String) {
         viewModelScope.launch (Dispatchers.IO ) {
-            todoDao.addTodo(Todo(title = title, createdAt = Date.from(Instant.now())))
+            todoDao.addTodo(Todo(title = title, description = description, createdAt = Date.from(Instant.now())))
         }
     }
 

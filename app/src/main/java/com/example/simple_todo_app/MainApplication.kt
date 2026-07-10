@@ -16,6 +16,6 @@ class MainApplication : Application() {
             applicationContext,
             TodoDatabase::class.java,
             TodoDatabase.NAME
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 }

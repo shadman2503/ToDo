@@ -1,6 +1,7 @@
 package com.example.simple_todo_app
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,37 +54,50 @@ fun TodoListPage(
     isDarkTheme: Boolean,
     onThemeToggle: () -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     val todoList by viewModel.todoList.observeAsState()
     var inputText by remember {
+        mutableStateOf("")
+    }
+    var inputDescription by remember {
         mutableStateOf("")
     }
 
     var showEditDialog by remember { mutableStateOf(false) }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
     var editedTitle by remember { mutableStateOf("") }
+    var editedDescription by remember { mutableStateOf("") }
 
     if (showEditDialog && todoToEdit != null) {
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
             title = { Text("Update Task") },
             text = {
-                OutlinedTextField(
-                    value = editedTitle,
-                    onValueChange = { editedTitle = it },
-                    label = { Text("Task Title") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(
+                        value = editedTitle,
+                        onValueChange = { editedTitle = it },
+                        label = { Text("Task Title") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = editedDescription,
+                        onValueChange = { editedDescription = it },
+                        label = { Text("Description") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
                         if (editedTitle.isNotBlank()) {
-                            viewModel.updateTodo(todoToEdit!!.copy(title = editedTitle))
+                            viewModel.updateTodo(todoToEdit!!.copy(title = editedTitle, description = editedDescription))
                             showEditDialog = false
                         }
                     },
-                    enabled = editedTitle.isNotBlank() && editedTitle != todoToEdit?.title
+                    enabled = editedTitle.isNotBlank() && (editedTitle != todoToEdit?.title || editedDescription != todoToEdit?.description)
                 ) {
                     Text("UPDATE")
                 }
@@ -119,26 +135,40 @@ fun TodoListPage(
                 .fillMaxHeight()
                 .padding(innerPadding)
                 .padding(8.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = {
+                        focusManager.clearFocus()
+                    })
+                }
         ) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                     value = inputText,
                     onValueChange = { inputText = it },
                     shape = RoundedCornerShape(8.dp),
                     placeholder = { Text("Enter task...") }
                 )
-                Button(onClick = {
-                    if (inputText.isNotBlank()) {
-                        viewModel.addTodo(inputText)
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = inputDescription,
+                    onValueChange = { inputDescription = it },
+                    shape = RoundedCornerShape(8.dp),
+                    placeholder = { Text("Enter description...") }
+                )
+                Button(
+                    modifier = Modifier.align(Alignment.End),
+                    enabled = inputText.isNotBlank(),
+                    onClick = {
+                        viewModel.addTodo(inputText, inputDescription)
                         inputText = ""
-                    }
-                }) {
+                        inputDescription = ""
+                    }) {
                     Text(text = "ADD")
                 }
             }
@@ -153,6 +183,7 @@ fun TodoListPage(
                                 onEdit = {
                                     todoToEdit = item
                                     editedTitle = item.title
+                                    editedDescription = item.description
                                     showEditDialog = true
                                 }
                             )
@@ -194,6 +225,13 @@ fun TodoItem(item: Todo, onDelete: () -> Unit, onEdit: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 style = MaterialTheme.typography.titleLarge
             )
+            if (item.description.isNotBlank()) {
+                Text(
+                    text = item.description,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
         IconButton(onClick = onEdit) {
             Icon(
