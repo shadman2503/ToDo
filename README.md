@@ -39,7 +39,7 @@ com.example.simple_todo_app
 
 ### Download APK
 You can download the latest debug APK from the link below:
-[**Download ToDo App APK**](./app/build/outputs/apk/debug/app-debug.apk)
+[**Download ToDo App APK**](./release/app-debug.apk)
 
 ### Prerequisites
 
