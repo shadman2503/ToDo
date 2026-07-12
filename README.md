@@ -1,6 +1,6 @@
 # ToDo App
 
-[![Download APK](https://img.shields.io/badge/DOWNLOAD-APK-green?style=for-the-badge&logo=android)](https://github.com/shadman2503/SimpleToDoApp/releases/latest)
+[![Download APK](https://img.shields.io/badge/DOWNLOAD-APK-green?style=for-the-badge&logo=android)](https://github.com/shadman2503/ToDo/releases/latest)
 
 A modern, lightweight Android application built with Jetpack Compose designed to help you manage your daily tasks efficiently. This app demonstrates the implementation of the MVVM architecture, Room database for persistent storage, and Material 3 design principles.
 
@@ -27,7 +27,7 @@ A modern, lightweight Android application built with Jetpack Compose designed to
 ## Project Structure
 
 ```text
-com.example.simple_todo_app
+com.example.todo
 ├── db/                # Database configuration, DAO, and Type Converters
 ├── MainActivity.kt    # Entry point of the application
 ├── MainApplication.kt # Application class for database initialization
@@ -49,7 +49,7 @@ com.example.simple_todo_app
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/shadman2503/SimpleToDoApp.git
+   git clone https://github.com/shadman2503/ToDo.git
    ```
 2. Open the project in Android Studio.
 3. Sync the project with Gradle files.
