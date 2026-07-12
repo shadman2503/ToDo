@@ -1,5 +1,7 @@
 # ToDo App
 
+[![Download APK](https://img.shields.io/badge/DOWNLOAD-APK-green?style=for-the-badge&logo=android)](https://github.com/shadman2503/SimpleToDoApp/releases/latest)
+
 A modern, lightweight Android application built with Jetpack Compose designed to help you manage your daily tasks efficiently. This app demonstrates the implementation of the MVVM architecture, Room database for persistent storage, and Material 3 design principles.
 
 ## Features
@@ -36,10 +38,6 @@ com.example.simple_todo_app
 ```
 
 ## Getting Started
-
-### Download APK
-You can download the latest debug APK from the link below:
-[**Download ToDo App APK**](./release/app-debug.apk)
 
 ### Prerequisites
 
