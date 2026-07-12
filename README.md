@@ -37,6 +37,10 @@ com.example.simple_todo_app
 
 ## Getting Started
 
+### Download APK
+You can download the latest debug APK from the link below:
+[**Download ToDo App APK**](./app/build/outputs/apk/debug/app-debug.apk)
+
 ### Prerequisites
 
 - Android Studio Ladybug | 2024.2.1 or newer
@@ -47,7 +51,7 @@ com.example.simple_todo_app
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/shadman2503/ToDo
+   git clone https://github.com/shadman2503/SimpleToDoApp.git
    ```
 2. Open the project in Android Studio.
 3. Sync the project with Gradle files.
