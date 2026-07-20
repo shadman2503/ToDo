@@ -30,20 +30,30 @@ class MainActivity : ComponentActivity() {
             var isDarkTheme by remember {
                 mutableStateOf(sharedPref.getBoolean("is_dark_theme", systemTheme))
             }
+            var showTrashBin by remember { mutableStateOf(false) }
 
             SimpleToDoAppTheme(darkTheme = isDarkTheme) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    TodoListPage(
-                        viewModel = todoViewModel,
-                        isDarkTheme = isDarkTheme,
-                    ) {
-                        isDarkTheme = !isDarkTheme
-                        sharedPref.edit {
-                            putBoolean("is_dark_theme", isDarkTheme)
-                        }
+                    if (showTrashBin) {
+                        TrashBinPage(
+                            viewModel = todoViewModel,
+                            onBack = { showTrashBin = false }
+                        )
+                    } else {
+                        TodoListPage(
+                            viewModel = todoViewModel,
+                            isDarkTheme = isDarkTheme,
+                            onThemeToggle = {
+                                isDarkTheme = !isDarkTheme
+                                sharedPref.edit {
+                                    putBoolean("is_dark_theme", isDarkTheme)
+                                }
+                            },
+                            onOpenTrash = { showTrashBin = true }
+                        )
                     }
                 }
             }

@@ -8,11 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LightMode
@@ -42,9 +42,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.simple_todo_app.utils.ListUtils
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -53,21 +56,18 @@ import java.util.Locale
 fun TodoListPage(
     viewModel: TodoViewModel,
     isDarkTheme: Boolean,
-    onThemeToggle: () -> Unit
+    onThemeToggle: () -> Unit,
+    onOpenTrash: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val todoList by viewModel.todoList.observeAsState()
-    var inputText by remember {
-        mutableStateOf("")
-    }
-    var inputDescription by remember {
-        mutableStateOf("")
-    }
+    var inputText by remember { mutableStateOf("") }
+    var inputDescription by remember { mutableStateOf(TextFieldValue("")) }
 
     var showEditDialog by remember { mutableStateOf(false) }
     var todoToEdit by remember { mutableStateOf<Todo?>(null) }
-    var editedTitle by remember { mutableStateOf("") }
-    var editedDescription by remember { mutableStateOf("") }
+    var editedTitle by remember { mutableStateOf(TextFieldValue("")) }
+    var editedDescription by remember { mutableStateOf(TextFieldValue("")) }
 
     if (showEditDialog && todoToEdit != null) {
         AlertDialog(
@@ -84,21 +84,24 @@ fun TodoListPage(
                     )
                     OutlinedTextField(
                         value = editedDescription,
-                        onValueChange = { editedDescription = it },
+                        onValueChange = { 
+                            editedDescription = ListUtils.handleListLogic(editedDescription, it)
+                        },
                         label = { Text("Description") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        visualTransformation = ListUtils.ListVisualTransformation
                     )
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        if (editedTitle.isNotBlank()) {
-                            viewModel.updateTodo(todoToEdit!!.copy(title = editedTitle, description = editedDescription))
+                        if (editedTitle.text.isNotBlank()) {
+                            viewModel.updateTodo(todoToEdit!!.copy(title = editedTitle.text, description = editedDescription.text))
                             showEditDialog = false
                         }
                     },
-                    enabled = editedTitle.isNotBlank() && (editedTitle != todoToEdit?.title || editedDescription != todoToEdit?.description)
+                    enabled = editedTitle.text.isNotBlank() && (editedTitle.text != todoToEdit?.title || editedDescription.text != todoToEdit?.description)
                 ) {
                     Text("UPDATE")
                 }
@@ -116,6 +119,12 @@ fun TodoListPage(
             TopAppBar(
                 title = { Text(stringResource(id = R.string.app_name)) },
                 actions = {
+                    IconButton(onClick = onOpenTrash) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Open Trash"
+                        )
+                    }
                     IconButton(onClick = onThemeToggle) {
                         Icon(
                             imageVector = if (isDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
@@ -153,22 +162,35 @@ fun TodoListPage(
                     value = inputText,
                     onValueChange = { inputText = it },
                     shape = RoundedCornerShape(8.dp),
-                    placeholder = { Text("Enter task...") }
+                    placeholder = { Text("Enter task...") },
+                    singleLine = true
                 )
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = inputDescription,
-                    onValueChange = { inputDescription = it },
+                    onValueChange = { 
+                        inputDescription = ListUtils.handleListLogic(inputDescription, it)
+                    },
                     shape = RoundedCornerShape(8.dp),
-                    placeholder = { Text("Enter description...") }
+                    placeholder = { Text("Enter description...") },
+                    visualTransformation = ListUtils.ListVisualTransformation
                 )
                 Button(
                     modifier = Modifier.align(Alignment.End),
                     enabled = inputText.isNotBlank(),
                     onClick = {
-                        viewModel.addTodo(inputText, inputDescription)
+                        val title = inputText
+                        val description = inputDescription.text
+                        
+                        // 1. Clear focus first to dismiss keyboard and stop active editing
+                        focusManager.clearFocus()
+                        
+                        // 2. Reset states
                         inputText = ""
-                        inputDescription = ""
+                        inputDescription = TextFieldValue("")
+                        
+                        // 3. Add to database
+                        viewModel.addTodo(title, description)
                     }) {
                     Text(text = "ADD")
                 }
@@ -178,13 +200,26 @@ fun TodoListPage(
                 LazyColumn(
                     content = {
                         itemsIndexed(it) { index: Int, item: Todo ->
+                            val backgroundColor = if (index % 2 == 0) {
+                                MaterialTheme.colorScheme.secondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant
+                            }
+                            val contentColor = if (index % 2 == 0) {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+
                             TodoItem(
                                 item = item,
-                                onDelete = { viewModel.deleteTodo(item.id) },
+                                backgroundColor = backgroundColor,
+                                contentColor = contentColor,
+                                onDelete = { viewModel.moveToTrash(item.id) },
                                 onEdit = {
                                     todoToEdit = item
-                                    editedTitle = item.title
-                                    editedDescription = item.description
+                                    editedTitle = TextFieldValue(item.title)
+                                    editedDescription = TextFieldValue(item.description)
                                     showEditDialog = true
                                 }
                             )
@@ -203,13 +238,19 @@ fun TodoListPage(
 }
 
 @Composable
-fun TodoItem(item: Todo, onDelete: () -> Unit, onEdit: () -> Unit) {
+fun TodoItem(
+    item: Todo,
+    backgroundColor: Color,
+    contentColor: Color,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.secondaryContainer)
+            .background(backgroundColor)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -218,18 +259,18 @@ fun TodoItem(item: Todo, onDelete: () -> Unit, onEdit: () -> Unit) {
         ) {
             Text(
                 text = SimpleDateFormat("hh:mm a, dd/MM", Locale.ENGLISH).format(item.createdAt),
-                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                color = contentColor.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.labelSmall
             )
             Text(
                 text = item.title,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                color = contentColor,
                 style = MaterialTheme.typography.titleLarge
             )
             if (item.description.isNotBlank()) {
                 Text(
-                    text = item.description,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                    text = ListUtils.formatAsList(item.description),
+                    color = contentColor.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
