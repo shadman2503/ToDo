@@ -28,29 +28,36 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Rename APK
+        run: mv app/build/outputs/apk/debug/app-debug.apk ToDoApp-latest.apk
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: ToDoApp-APK
+          path: ToDoApp-latest.apk
 
   release:
     name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
     steps:
       - name: Download APK
         uses: actions/download-artifact@v4
         with:
-          name: app-debug
+          name: ToDoApp-APK
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: app-debug.apk
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
+          files: ToDoApp-latest.apk
+          tag_name: latest
+          name: Latest Build
+          body: |
+            This is an automated build of the latest version of the ToDo App.
+            Download the APK below to install it on your Android device.
           draft: false
           prerelease: false
         env:
