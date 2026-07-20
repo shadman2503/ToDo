@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simple_todo_app.utils.ListUtils
@@ -147,12 +148,13 @@ fun TrashedItem(
     onRestore: () -> Unit,
     onDeletePermanently: () -> Unit
 ) {
+    val alpha = if (item.isCompleted) 0.5f else 1f
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(backgroundColor)
+            .background(backgroundColor.copy(alpha = alpha))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -161,18 +163,20 @@ fun TrashedItem(
         ) {
             Text(
                 text = "Deleted: ${SimpleDateFormat("hh:mm a, dd/MM", Locale.ENGLISH).format(item.deletedAt!!)}",
-                color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f * alpha),
                 style = MaterialTheme.typography.labelSmall
             )
             Text(
                 text = item.title,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
+                textDecoration = if (item.isCompleted) TextDecoration.LineThrough else TextDecoration.None
             )
             if (item.description.isNotBlank()) {
                 Text(
                     text = ListUtils.formatAsList(item.description),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f * alpha)
                 )
             }
         }

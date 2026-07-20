@@ -39,6 +39,12 @@ class TodoViewModel: ViewModel() {
         }
     }
 
+    fun toggleComplete(todo: Todo) {
+        viewModelScope.launch(Dispatchers.IO) {
+            todoDao.updateTodo(todo.copy(isCompleted = !todo.isCompleted))
+        }
+    }
+
     fun moveToTrash(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             todoDao.moveToTrash(id, Date.from(Instant.now()))

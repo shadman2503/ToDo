@@ -13,9 +13,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.simple_todo_app.utils.ListUtils
@@ -215,6 +218,7 @@ fun TodoListPage(
                                 item = item,
                                 backgroundColor = backgroundColor,
                                 contentColor = contentColor,
+                                onToggleComplete = { viewModel.toggleComplete(item) },
                                 onDelete = { viewModel.moveToTrash(item.id) },
                                 onEdit = {
                                     todoToEdit = item
@@ -242,35 +246,45 @@ fun TodoItem(
     item: Todo,
     backgroundColor: Color,
     contentColor: Color,
+    onToggleComplete: () -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit
 ) {
+    val alpha = if (item.isCompleted) 0.5f else 1f
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(backgroundColor)
+            .background(backgroundColor.copy(alpha = alpha))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        IconButton(onClick = onToggleComplete) {
+            Icon(
+                imageVector = if (item.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                contentDescription = "Toggle Complete",
+                tint = if (item.isCompleted) MaterialTheme.colorScheme.primary else contentColor.copy(alpha = 0.6f)
+            )
+        }
         Column(
             modifier = Modifier.weight(1f)
         ) {
             Text(
                 text = SimpleDateFormat("hh:mm a, dd/MM", Locale.ENGLISH).format(item.createdAt),
-                color = contentColor.copy(alpha = 0.7f),
+                color = contentColor.copy(alpha = 0.5f * alpha),
                 style = MaterialTheme.typography.labelSmall
             )
             Text(
                 text = item.title,
-                color = contentColor,
-                style = MaterialTheme.typography.titleLarge
+                color = contentColor.copy(alpha = alpha),
+                style = MaterialTheme.typography.titleLarge,
+                textDecoration = if (item.isCompleted) TextDecoration.LineThrough else TextDecoration.None
             )
             if (item.description.isNotBlank()) {
                 Text(
                     text = ListUtils.formatAsList(item.description),
-                    color = contentColor.copy(alpha = 0.8f),
+                    color = contentColor.copy(alpha = 0.6f * alpha),
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

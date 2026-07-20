@@ -12,5 +12,6 @@ data class Todo(
     var title: String,
     var description: String,
     var createdAt: Date,
-    var deletedAt: Date? = null
+    var deletedAt: Date? = null,
+    var isCompleted: Boolean = false
 )
