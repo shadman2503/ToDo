@@ -1,5 +1,6 @@
 package com.example.simple_todo_app
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,6 +47,7 @@ fun TrashBinPage(
     viewModel: TodoViewModel,
     onBack: () -> Unit
 ) {
+    BackHandler(onBack = onBack)
     val trashedTodos by viewModel.trashedTodos.observeAsState()
     var todoToDeletePermanently by remember { mutableStateOf<Todo?>(null) }
 
