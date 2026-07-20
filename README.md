@@ -4,15 +4,17 @@
 
 A modern, lightweight Android application built with Jetpack Compose designed to help you manage your daily tasks efficiently. This app demonstrates the implementation of the MVVM architecture, Room database for persistent storage, and Material 3 design principles.
 
-## Features
+## Features (v1.1.0 Updates)
 
-- **Task Management**: Easily add, edit, and delete tasks.
-- **Detailed Tasks**: Each task supports both a title and an optional description.
-- **Persistent Storage**: Uses Room Database to ensure your tasks are saved even after closing the app.
-- **Theming**: Full support for Dark and Light modes with a seamless toggle in the UI.
-- **Timestamps**: Automatically records and displays the creation time for every task.
-- **Modern UI**: Built entirely with Jetpack Compose and Material 3 components for a smooth user experience.
-- **Focus Management**: Intuitive focus clearing when tapping outside of input fields.
+- **Task Completion**: Mark tasks as done with a single tap. Completed tasks are visually distinguished with a strike-through title and a grayed-out effect.
+- **Trash Bin**: Deleted tasks are moved to a Trash Bin. Items are automatically purged after 7 days, but can be restored or manually deleted permanently at any time.
+- **Automatic List System**: Efficiently create lists in descriptions. Supports bullets (`-`, `*`, `•`) and numbered lists (`1.`) with automatic indentation, continuation on Enter, and bold formatting.
+- **Improved UI Scanability**: Alternating background colors (Zebra striping) for list items and better contrast in both light and dark modes.
+- **Automated Releases**: Integrated GitHub Actions for automatic APK building and versioning on every push and tag.
+- **Task Management**: Easily add, edit, and soft-delete tasks.
+- **Persistent Storage**: Uses Room Database (Schema v4) to ensure your tasks and their states are saved safely.
+- **Theming**: Full support for Dark and Light modes with a seamless toggle.
+- **Focus & Keyboard Management**: Intuitive focus clearing and automatic keyboard dismissal for a smoother workflow.
 
 ## Tech Stack
 
@@ -23,18 +25,21 @@ A modern, lightweight Android application built with Jetpack Compose designed to
 - **Architecture**: MVVM (Model-View-ViewModel)
 - **Asynchronous Programming**: [Coroutines](https://kotlinlang.org/docs/coroutines-overview.html)
 - **Data Observation**: LiveData
+- **CI/CD**: [GitHub Actions](https://github.com/features/actions)
 
 ## Project Structure
 
 ```text
-com.example.todo
+com.example.simple_todo_app
 ├── db/                # Database configuration, DAO, and Type Converters
-├── MainActivity.kt    # Entry point of the application
+├── utils/             # Utility classes (List logic, formatting)
+├── MainActivity.kt    # Entry point and navigation handling
 ├── MainApplication.kt # Application class for database initialization
 ├── Todo.kt            # Room Entity representing a task
-├── TodoListPage.kt    # Main UI screen built with Compose
+├── TodoListPage.kt    # Main task list UI
+├── TrashBinPage.kt    # Trash management UI
 ├── TodoViewModel.kt   # Business logic and data stream handling
-└── ui/theme/          # Material 3 theme definitions (Color, Type, Theme)
+└── ui/theme/          # Material 3 theme definitions
 ```
 
 ## Getting Started
@@ -57,7 +62,7 @@ com.example.todo
 
 ## Screenshots
 
-### Main Interface
+### Main Interface & Completion
 <p align="center">
   <img src="./screenshots/light_mode.png" width="300" alt="Light Mode" />
   <img src="./screenshots/dark_mode.png" width="300" alt="Dark Mode" />
